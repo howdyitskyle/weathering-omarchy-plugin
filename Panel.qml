@@ -26,14 +26,14 @@ Panel {
     openedFromHotkey = false
     setCenterHoverRevealSuppressed(false)
     root.controller.show()
-    locationFile.reload()
+    root.readLocationFile()
     root.refresh()
   }
 
   function openFromHotkey() {
     openedFromHotkey = true
     root.controller.show()
-    locationFile.reload()
+    root.readLocationFile()
     root.refresh()
     Qt.callLater(function() {
       if (root.opened) setCenterHoverRevealSuppressed(true)
@@ -92,23 +92,58 @@ Panel {
     Qt.callLater(refresh)
   }
 
+  readonly property string locationFilePath: Quickshell.env("HOME") + "/.local/state/omarchy/settings/weather.json"
+
+  // The location file sits at a predictable, user-writable path, so reads are
+  // bounded: only a regular file under the byte cap is read, and head -c caps
+  // the transfer even if the file is swapped between the check and the read.
+  readonly property int locationFileMaxBytes: 4096
+
+  function readLocationFile() {
+    locationReadProc.running = false
+    locationReadProc.running = true
+  }
+
+  Process {
+    id: locationReadProc
+
+    command: [
+      "sh", "-c",
+      "f=\"$1\"; [ -f \"$f\" ] || exit 0;"
+      + " s=$(stat -c %s \"$f\" 2>/dev/null || echo 999999);"
+      + " [ \"$s\" -le \"$2\" ] || exit 0;"
+      + " head -c \"$2\" \"$f\"",
+      "sh", root.locationFilePath, String(root.locationFileMaxBytes)
+    ]
+
+    stdout: StdioCollector {
+      waitForEnd: true
+      onStreamFinished: {
+        root.configuredLocationState = Model.parseLocationFile(String(text || ""))
+      }
+    }
+  }
+
+  // Watcher only (preload false means it never reads): re-reads happen via
+  // readLocationFile, keeping the bounded read the only way file contents
+  // reach the panel.
   property FileView locationFile: FileView {
-    path: Quickshell.env("HOME") + "/.local/state/omarchy/settings/weather.json"
+    path: root.locationFilePath
     watchChanges: true
     printErrors: false
-    onFileChanged: reload()
-    onLoaded: root.configuredLocationState = Model.parseLocationFile(text())
-    onLoadFailed: root.configuredLocationState = Model.parseLocationFile("")
+    preload: false
+    onFileChanged: root.readLocationFile()
   }
 
   // The first read can race shell startup (observed sporadically), leaving a
   // stored location unhonored until the next file write. One delayed reload
   // self-corrects; if the first read was fine it's a no-op, since identical
   // state doesn't change locationQuery and so triggers no refetch.
+  Component.onCompleted: root.readLocationFile()
   Timer {
     interval: 1500
     running: true
-    onTriggered: locationFile.reload()
+    onTriggered: root.readLocationFile()
   }
 
   property int forecastRetries: 0
@@ -523,7 +558,7 @@ Panel {
     onExited: function(exitCode) {
       if (exitCode !== 0 || !root.savingLocation) return
 
-      locationFile.reload()
+      root.readLocationFile()
       if (!root.savingLocationQueryStarted) {
         root.savingLocationQueryStarted = true
         root.forecastRetries = 0
@@ -679,6 +714,7 @@ KeyboardPanel {
 
                 Text {
                   text: (root.reportLocation || "").toUpperCase()
+                  textFormat: Text.PlainText
                   color: root.dimText
                   font.family: root.bar.fontFamily
                   font.pixelSize: Style.font.body
@@ -837,6 +873,7 @@ KeyboardPanel {
 
                   Text {
                     text: modelData.name
+                    textFormat: Text.PlainText
                     color: index === root.suggestionIndex ? Style.hoverStateColor(root.bar.foreground, Color.accent) : root.bar.foreground
                     font.family: root.bar.fontFamily
                     font.pixelSize: Style.font.body
@@ -844,6 +881,7 @@ KeyboardPanel {
                   Text {
                     visible: text !== ""
                     text: modelData.description
+                    textFormat: Text.PlainText
                     color: root.dimText
                     font.family: root.bar.fontFamily
                     font.pixelSize: Style.font.bodySmall
