@@ -65,12 +65,15 @@ Fetch policy: fetches fire on open, on location change, and on a `refreshTimer` 
 runs unconditionally (`running: true`, `triggeredOnStart`) — it keeps fetching every
 `refreshMinutes` even while the panel is closed. Each `Process` is guarded against
 concurrent runs; failed responses retry up to 3 times (2.5s apart) before leaving
-stale data visible. To avoid wasted external requests, the wttr.in `forecastProc`
-only fires when there are **no** configured coordinates (IP auto-detect), and the
-air-quality fetch only fires when `showAirQuality` is true. A refresh/location change
-cancels any pending retry timers so requests can't stack. With no data at all, the
-placeholder switches from "Fetching forecast…" to a couldn't-reach message once the
-retries are exhausted (`weatherUnavailable`).
+stale data visible. Every `curl` also carries a `--max-filesize` cap (wttr j1:
+256 KiB, open-meteo daily: 128 KiB, air quality/geocoding: 32 KiB, wttr `%l`: 4 KiB)
+so `StdioCollector` never buffers an unbounded remote response. To avoid wasted
+external requests, the wttr.in `forecastProc` only fires when there are **no**
+configured coordinates (IP auto-detect), and the air-quality fetch only fires when
+`showAirQuality` is true. A refresh/location change cancels any pending retry timers
+so requests can't stack. With no data at all, the placeholder switches from
+"Fetching forecast…" to a couldn't-reach message once the retries are exhausted
+(`weatherUnavailable`).
 
 ## Location
 

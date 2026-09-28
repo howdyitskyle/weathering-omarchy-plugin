@@ -291,7 +291,7 @@ Panel {
       + "&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max"
       + "&forecast_days=8"
       + "&timezone=auto"
-    dailyForecastProc.command = ["curl", "-fsS", "--max-time", "5", url]
+    dailyForecastProc.command = ["curl", "-fsS", "--max-time", "5", "--max-filesize", "131072", url]
     dailyForecastProc.running = true
 
     if (root.showAirQuality) refreshAirQuality(lat, lon)
@@ -304,7 +304,7 @@ Panel {
       + "&longitude=" + encodeURIComponent(String(lon))
       + "&current=us_aqi,pm10,pm2_5,nitrogen_dioxide,ozone"
       + "&timezone=auto"
-    airQualityProc.command = ["curl", "-fsS", "--max-time", "5", url]
+    airQualityProc.command = ["curl", "-fsS", "--max-time", "5", "--max-filesize", "32768", url]
     airQualityProc.running = true
   }
 
@@ -395,7 +395,7 @@ Panel {
 
   function startGeocode() {
     geocodeActiveQuery = geocodePendingQuery
-    geocodeProc.command = ["curl", "-fsS", "--max-time", "5",
+    geocodeProc.command = ["curl", "-fsS", "--max-time", "5", "--max-filesize", "32768",
       "https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(geocodeActiveQuery) + "&count=5&language=en&format=json"]
     geocodeProc.running = true
   }
@@ -422,7 +422,7 @@ Panel {
 
   Process {
     id: forecastProc
-    command: ["curl", "-fsS", "--max-time", "10", "https://wttr.in/" + root.locationQuery + "?format=j1"]
+    command: ["curl", "-fsS", "--max-time", "10", "--max-filesize", "262144", "https://wttr.in/" + root.locationQuery + "?format=j1"]
     stdout: StdioCollector {
       waitForEnd: true
       onStreamFinished: {
@@ -575,7 +575,7 @@ Panel {
 
   Process {
     id: locationProc
-    command: ["curl", "-fsS", "--max-time", "4", "https://wttr.in/?format=%l"]
+    command: ["curl", "-fsS", "--max-time", "4", "--max-filesize", "4096", "https://wttr.in/?format=%l"]
     stdout: StdioCollector {
       waitForEnd: true
       onStreamFinished: {
