@@ -77,11 +77,12 @@ retries are exhausted (`weatherUnavailable`).
 Shared with the built-in weather widget: read/write
 `~/.local/state/omarchy/settings/weather.json` (`{name, latitude, longitude}`, blank =
 IP auto-detect), via `omarchy-weather-location` for writes and a bounded read for
-reads. Don't introduce a second location store. Content is read with a `Process`
-(`sh -c`) that only reads a regular file under a 4096-byte cap (`[ -f ]` + `stat`
-size check + `head -c` transfer cap); a `FileView` (`preload: false`) is kept
-purely as a `watchChanges` notifier so hand edits still trigger `readLocationFile()`.
-A delayed 1.5s reload after startup self-corrects a first-read race.
+reads. Don't introduce a second location store. Content is read with a single
+descriptor-safe `Process` (`dd` with `iflag=noatime,nonblock,nofollow`): O_NOFOLLOW
+rejects symlinks, O_NONBLOCK never blocks on a FIFO, and the 4096-byte `bs`/`count`
+caps the transfer. A `FileView` (`preload: false`) is kept purely as a `watchChanges`
+notifier so hand edits still trigger `readLocationFile()`. A delayed 1.5s reload
+after startup self-corrects a first-read race.
 
 ## Settings
 

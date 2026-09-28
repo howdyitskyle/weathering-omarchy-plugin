@@ -94,9 +94,9 @@ Panel {
 
   readonly property string locationFilePath: Quickshell.env("HOME") + "/.local/state/omarchy/settings/weather.json"
 
-  // The location file sits at a predictable, user-writable path, so reads are
-  // bounded: only a regular file under the byte cap is read, and head -c caps
-  // the transfer even if the file is swapped between the check and the read.
+  // The location file sits at a predictable, user-writable path, so the read
+  // is descriptor-safe: O_NOFOLLOW rejects symlinks, O_NONBLOCK never blocks
+  // on a FIFO, and the transfer is capped at this many bytes.
   readonly property int locationFileMaxBytes: 4096
 
   function readLocationFile() {
@@ -107,13 +107,14 @@ Panel {
   Process {
     id: locationReadProc
 
+    // One descriptor-safe open instead of a check-then-open path chain:
+    // O_NOFOLLOW (iflag=nofollow) rejects symlinks, O_NONBLOCK (nonblock)
+    // never blocks on a FIFO, and the 4096-byte count caps the read even if
+    // the file is swapped or grows between open and read.
     command: [
-      "sh", "-c",
-      "f=\"$1\"; [ -f \"$f\" ] || exit 0;"
-      + " s=$(stat -c %s \"$f\" 2>/dev/null || echo 999999);"
-      + " [ \"$s\" -le \"$2\" ] || exit 0;"
-      + " head -c \"$2\" \"$f\"",
-      "sh", root.locationFilePath, String(root.locationFileMaxBytes)
+      "dd", "if=" + root.locationFilePath,
+      "iflag=noatime,nonblock,nofollow",
+      "bs=" + root.locationFileMaxBytes, "count=1", "status=none"
     ]
 
     stdout: StdioCollector {
