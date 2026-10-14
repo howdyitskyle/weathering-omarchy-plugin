@@ -20,13 +20,13 @@ permissions.
   Right-click sends a notification via `omarchy-weather-status`; middle-click refreshes.
 - `Panel.qml` — details panel, rclone-style sectioned layout: the built-in
   weather hero (64px glyph + 56px temp, location click-to-edit, FEELS/WIND/
-  PRECIP stats), then `PanelSectionHeader` sections for the hourly strip (six
-  cells, NOW highlighted), a METRICS grid (wind/humidity, pressure/UV, air
-  quality/sun rows), and a 7-day strip (today highlighted). No custom surface:
-  the KeyboardPanel paints the theme popup surface (`Color.popups.background`)
-  so the panel follows dark and light themes. Cell wash is a foreground alpha:
-  0.05 for the metric/AQ/Sun cards and non-highlighted strip cells, 0.1 for NOW
-  /today. Fetches with `curl` via
+  PRECIP stats), then `PanelSectionHeader` sections for the hourly strip (up to
+  `hourlyCells` cells, default 6, NOW highlighted), a METRICS grid (wind/
+  humidity, pressure/UV, air quality/sun rows), and a 7-day strip (today
+  highlighted). No custom surface: the KeyboardPanel paints the theme popup
+  surface (`Color.popups.background`) so the panel follows dark and light
+  themes. Cell wash is a foreground alpha: 0.05 for the metric/AQ/Sun cards and
+  non-highlighted strip cells, 0.1 for NOW/today. Fetches with `curl` via
   Quickshell `Process` blocks. Sets `manageIpc: false` and registers its own
   `IpcHandler` (target = `ipcTarget`).
 - `Model.js` — pure JS helpers (parsing, unit conversion, weather-code → glyph, wind
@@ -95,8 +95,17 @@ defaults come from the manifest `barWidget.schema`/`defaults` (`unit`, `refreshM
 `showHourly`, `showAirQuality`, `showMetrics`, `showSun`, `show7day`,
 `showFeelsLike`, `hourlyCells`).
 
+## Release
+
+- Releases are cut by bumping `manifest.json` `version` and tagging `vX.Y.Z`
+  (existing tags: v1.0.0 … v1.2.5). The marketplace catalog lists that `version`,
+  and `omarchy plugin add/update` reads it; there is no other release artifact.
+
 ## Dev loop
 
+- `$OMARCHY_PATH` is the Omarchy install root (`/usr/share/omarchy` here); the
+  `qmllint -I` and `qs log -p` commands need it. The plugin only runs inside
+  `omarchy-shell` — there is no standalone runner.
 - Plugin id: `io.github.howdyitskyle.weathering`.
 - Installed copy: `~/.config/omarchy/plugins/io.github.howdyitskyle.weathering/`
   (copy files there; saving under the folder hot-reloads).
@@ -106,6 +115,17 @@ defaults come from the manifest `barWidget.schema`/`defaults` (`unit`, `refreshM
 - Shell log: `qs log -p "$OMARCHY_PATH/shell" --tail 100`.
 - Test lifecycle: `omarchy-shell shell summon|toggle|hide <id> '{}'` (routed to the
   BarWidget's `open`/`close`).
+
+## Checks
+
+- No package manager, CI, formatter, or test runner — this is a flat QML/JS repo.
+  The only automated checks are `omarchy plugin validate .` (manifest schema) and
+  `python3 test/glyph-coverage.py`.
+- `test/glyph-coverage.py` scans only repo-root `*.qml`/`*.js` (not `test/`) and
+  depends on `fc-match` resolving JetBrainsMono Nerd Font; if it can't, it prints
+  "(skipped: no font file resolved)" and exits 0 — a green run can be vacuous.
+- `Model.js` is plain JS with a guarded `module.exports`, so
+  `node -e 'require("./Model.js")'` works for quick checks; nothing else tests it.
 
 ## Conventions
 
@@ -123,6 +143,11 @@ defaults come from the manifest `barWidget.schema`/`defaults` (`unit`, `refreshM
   Temperature readouts use `body` in the hourly/7-day strips, `title` in the
   hero stats, and the oversized 56px only in the hero.
 - No comments unless they explain a non-obvious decision (existing code style).
-- `qmllint` in this repo's environment (v1.0, a minimal verifier) rejects the
-  `: void` return-type annotations used on `IpcHandler` methods; ignore that
-  false positive and keep the annotations (they match the built-in plugins).
+- `qmllint` here is v1.0, a minimal verifier. `Panel.qml` carries `: void`
+  return-type annotations on its `IpcHandler` methods; qmllint rejects them by
+  exiting **255 with no diagnostic**. Keep the annotations (they match the
+  built-in plugins); to lint the rest of the file, strip `(): void` in a temp
+  copy first. The other QML files pass as-is.
+- `setCenterHoverRevealSuppressed` is called through a runtime feature check that
+  falls back to assigning the `centerHoverRevealSuppressed` property, because the
+  Omarchy API changed across versions. Keep both branches.

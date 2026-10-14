@@ -8,6 +8,8 @@ and [wttr.in](https://wttr.in) — no API key, no account.
 
 <p align="center"><img src="preview.png" alt="Weathering panel" width="520"></p>
 
+Featured on the [Omarchy plugin marketplace](https://plugins.omarchy.org/plugin.html?id=io.github.howdyitskyle.weathering).
+
 ## Features
 
 | Section | Shows |
