@@ -4,11 +4,10 @@ A weather widget for the [Omarchy](https://omarchy.org) bar. One pill in the
 bar; one panel with a sectioned layout: a current-conditions hero, metric cells
 (wind, humidity, pressure, UV index, air quality, sun), an hourly strip, and a
 7-day forecast. Weather data comes from [Open-Meteo](https://open-meteo.com)
-and [wttr.in](https://wttr.in) — no API key, no account.
+and [wttr.in](https://wttr.in) — no API key, no account. Featured on the
+[Omarchy plugin marketplace](https://plugins.omarchy.org/plugin.html?id=io.github.howdyitskyle.weathering).
 
 <p align="center"><img src="preview.png" alt="Weathering panel" width="520"></p>
-
-Featured on the [Omarchy plugin marketplace](https://plugins.omarchy.org/plugin.html?id=io.github.howdyitskyle.weathering).
 
 ## Table of Contents
 
