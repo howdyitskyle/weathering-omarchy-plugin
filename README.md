@@ -9,7 +9,7 @@ and [wttr.in](https://wttr.in) — no API key, no account. Featured on the
 
 <p align="center"><img src="preview.png" alt="Weathering panel" width="520"></p>
 
-## Table of Contents
+## Contents
 
 - [Features](#features)
 - [Install](#install)
