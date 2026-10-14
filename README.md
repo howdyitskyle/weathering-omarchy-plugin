@@ -10,6 +10,18 @@ and [wttr.in](https://wttr.in) — no API key, no account.
 
 Featured on the [Omarchy plugin marketplace](https://plugins.omarchy.org/plugin.html?id=io.github.howdyitskyle.weathering).
 
+## Table of Contents
+
+- [Features](#features)
+- [Install](#install)
+- [Use](#use)
+- [Location](#location)
+- [Configure](#configure)
+- [Data](#data)
+- [Remove](#remove)
+- [Security](#security)
+- [License](#license)
+
 ## Features
 
 | Section | Shows |
