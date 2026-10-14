@@ -9,6 +9,7 @@ and [wttr.in](https://wttr.in) — no API key, no account. Featured on the
 
 <p align="center"><img src="preview.png" alt="Weathering panel" width="520"></p>
 
+
 ## Contents
 
 - [Features](#features)
@@ -20,6 +21,7 @@ and [wttr.in](https://wttr.in) — no API key, no account. Featured on the
 - [Remove](#remove)
 - [Security](#security)
 - [License](#license)
+
 
 ## Features
 
@@ -36,6 +38,7 @@ The panel uses the theme's popup surface, so it follows dark and light themes.
 Everything is metric or imperial aware (auto / metric / imperial, or per your
 locale). The hourly strip and air-quality section can be hidden via the
 `showHourly` and `showAirQuality` settings (see [Configure](#configure)).
+
 
 ## Install
 
@@ -58,6 +61,7 @@ default):
 omarchy bar move io.github.howdyitskyle.weathering --section center
 ```
 
+
 ## Use
 
 Click the pill to open or close the panel. Press Escape to close it. Middle-click
@@ -73,12 +77,14 @@ bindings file — `bindd` is a superkey chord binding, so this one is
 bindd = SUPER CTRL, W, Weathering, exec, omarchy-shell shell toggle io.github.howdyitskyle.weathering '{}'
 ```
 
+
 ## Location
 
 The plugin shares its location with the built-in `omarchy.weather` widget via
 `~/.local/state/omarchy/settings/weather.json`, so setting a location in either
 one keeps both in sync. Without a configured location the panel auto-detects
 from your IP address.
+
 
 ## Configure
 
@@ -128,6 +134,7 @@ no restart is needed — the change takes effect immediately. You can also set
 these from the settings form in `omarchy bar` rather than editing the file by
 hand.
 
+
 ## Data
 
 Most data comes from Open-Meteo's free APIs (`api.open-meteo.com`,
@@ -143,6 +150,7 @@ runs every `refreshMinutes` (even while the panel is closed) so the bar pill
 stays current. When a location is configured, the Open-Meteo forecast is the
 authoritative current-condition source; without one, wttr.in fills the hero.
 
+
 ## Remove
 
 ```sh
@@ -156,6 +164,7 @@ manually (no git repo), the folder is **backed up** to
 `~/.config/omarchy/plugins/.io.github.howdyitskyle.weathering.bak.<timestamp>`
 rather than deleted, so you can recover it if needed.
 
+
 ## Security
 
 Omarchy plugins run as **unsandboxed code** inside your long-lived
@@ -163,6 +172,7 @@ Omarchy plugins run as **unsandboxed code** inside your long-lived
 trust, and review the source before enabling. This plugin reads weather data
 from Open-Meteo and wttr.in over HTTPS and shares your location via
 `omarchy-weather-location` — it does not ship or run any external scripts.
+
 
 ## License
 
